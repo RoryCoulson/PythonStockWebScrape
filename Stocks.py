@@ -24,13 +24,24 @@ closeTime = '17:02PM'  # roughly
 
 
 def getStockPriceInfo():
+    currentDateTime = datetime.datetime.now()
+    currentDay = currentDateTime.isoweekday()
+
     stock_containers = soup.find_all('div', class_='My(6px) Pos(r) smartphone_Mt(6px)')
     stock_price = stock_containers[0].find(class_='Trsdu(0.3s) Trsdu(0.3s) Fw(b) Fz(36px) Mb(-4px) D(b)')
-    stock_stats = stock_containers[0].find(class_='Trsdu(0.3s) Fw(500) Fz(14px) C($positiveColor)')
+
+    stock_stats_positive = stock_containers[0].find(class_='Trsdu(0.3s) Fw(500) Fz(14px) C($positiveColor)')
+    stock_stats_negative = stock_containers[0].find(class_='Trsdu(0.3s) Fw(500) Fz(14px) C($negativeColor)')
     td = soup.find_all('td')
     day_range = td[9]
     currentTime = currentDateTime.strftime("%H:%M")
 
+    if not stock_stats_negative:        # checks if positive or negative as the class changes depending on which one
+        stock_stats = stock_stats_positive
+    else:
+        stock_stats = stock_stats_negative
+
+    print(stock_containers)
     print("Current time:", currentTime)  # current time
     print("Market Summary > Coca-Cola Co")
     print("-----------------------------------")
@@ -46,7 +57,6 @@ def getStockPriceInfo():
 
     print("-----------------------------------")
 
-    stockMarket = "open"
     msg.add_alternative("""\
             <!DOCTYPE html>
             <html>
@@ -116,11 +126,11 @@ def getStockPriceChangeInfo():
 print("Welcome to Coca Cola Stocks python program")
 print("Time is: ", datetime.datetime.now())  # date time stamp
 morning = "08:00"
-mid_day = "16:57"
+mid_day = "12:30"
 # sends email at morning, mid day and 4, about the stock status
 schedule.every().day.at(morning).do(getStockPriceInfo)
 schedule.every().day.at(mid_day).do(getStockPriceInfo)
-schedule.every().day.at("16:55").do(getStockPriceInfo)
+schedule.every().day.at("16:00").do(getStockPriceInfo)
 
 # this will check if the change in price is significant and then send an email if so
 schedule.every(30).seconds.do(getStockPriceChangeInfo)
